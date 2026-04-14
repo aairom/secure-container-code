@@ -1,0 +1,17 @@
+# Ignore unnecessary files during Docker build
+*.md
+.git
+.gitignore
+Dockerfile
+.dockerignore
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.eslintcache
+*.log
+*.tmp
+dist/
+coverage/
+.nyc_output/

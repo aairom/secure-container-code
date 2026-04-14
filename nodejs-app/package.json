@@ -1,0 +1,23 @@
+{
+  "name": "secure-nodejs-app",
+  "version": "1.0.0",
+  "description": "Secure Node.js application with obfuscated code",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "obfuscate": "javascript-obfuscator app.js --output dist/app.js --compact true --control-flow-flattening true --dead-code-injection true --string-array true --string-array-encoding base64"
+  },
+  "keywords": [
+    "secure",
+    "obfuscation",
+    "proprietary"
+  ],
+  "author": "",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "javascript-obfuscator": "^4.1.0"
+  }
+}
