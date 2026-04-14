@@ -99,6 +99,14 @@ secure-container-code/
 │   ├── package.json
 │   ├── Dockerfile
 │   └── .dockerignore
+├── k8s/                 # Kubernetes manifests
+│   ├── go-app-deployment.yaml
+│   ├── cpp-app-deployment.yaml
+│   ├── python-app-deployment.yaml
+│   ├── nodejs-app-deployment.yaml
+│   ├── ingress.yaml
+│   ├── network-policy.yaml
+│   └── README.md
 ├── Docs/                # Comprehensive documentation
 │   ├── 01-Overview.md
 │   ├── 02-Go-Application.md
@@ -107,6 +115,9 @@ secure-container-code/
 │   ├── 05-NodeJS-Application.md
 │   ├── 06-Security-Analysis.md
 │   └── 07-Mermaid-Diagrams.md
+├── BUILD-VERIFICATION.md
+├── CHANGELOG.md
+├── test-builds.sh
 └── README.md            # This file
 ```
 
@@ -245,6 +256,39 @@ More diagrams available in [Mermaid Diagrams](Docs/07-Mermaid-Diagrams.md).
    - API-only access
    - Subscription-based licensing
 
+## ☸️ Kubernetes Deployment
+
+Complete Kubernetes manifests are available in the `k8s/` directory.
+
+### Quick Deploy to Kubernetes
+
+```bash
+# Deploy all applications
+kubectl apply -f k8s/go-app-deployment.yaml
+kubectl apply -f k8s/cpp-app-deployment.yaml
+kubectl apply -f k8s/python-app-deployment.yaml
+kubectl apply -f k8s/nodejs-app-deployment.yaml
+
+# Optional: Deploy ingress and network policies
+kubectl apply -f k8s/ingress.yaml
+kubectl apply -f k8s/network-policy.yaml
+
+# Verify deployments
+kubectl get all -n secure-apps
+```
+
+### Kubernetes Features
+
+- ✅ **Production-ready manifests** - Deployments, Services, HPA
+- ✅ **Security hardened** - Non-root, read-only FS, dropped capabilities
+- ✅ **Auto-scaling** - HPA configured for CPU/Memory
+- ✅ **Health checks** - Liveness, readiness, and startup probes
+- ✅ **Resource limits** - Requests and limits defined
+- ✅ **Network policies** - Traffic restriction
+- ✅ **Ingress** - Path and subdomain-based routing
+
+See [k8s/README.md](k8s/README.md) for detailed Kubernetes deployment guide.
+
 ## 🔧 Advanced Usage
 
 ### With License Key
@@ -360,7 +404,7 @@ For questions, issues, or suggestions:
 - [ ] Add Rust implementation
 - [ ] Add Java implementation
 - [ ] Docker Compose orchestration
-- [ ] Kubernetes deployment examples
+- [x] Kubernetes deployment examples ✅
 - [ ] CI/CD pipeline examples
 - [ ] Security scanning integration
 - [ ] Performance benchmarking suite

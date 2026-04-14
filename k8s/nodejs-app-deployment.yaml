@@ -1,0 +1,188 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodejs-app-config
+  namespace: secure-apps
+data:
+  PORT: "8080"
+  NODE_ENV: "production"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nodejs-app-secrets
+  namespace: secure-apps
+type: Opaque
+stringData:
+  LICENSE_KEY: "DEMO-LICENSE-KEY"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-nodejs-app
+  namespace: secure-apps
+  labels:
+    app: secure-nodejs-app
+    language: nodejs
+    security: medium
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: secure-nodejs-app
+  template:
+    metadata:
+      labels:
+        app: secure-nodejs-app
+        language: nodejs
+        security: medium
+    spec:
+      # Security context for the pod
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      
+      containers:
+      - name: nodejs-app
+        image: secure-nodejs-app:latest
+        imagePullPolicy: IfNotPresent
+        
+        # Container security context
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+              - ALL
+        
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-app-config
+              key: PORT
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-app-config
+              key: NODE_ENV
+        - name: LICENSE_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-app-secrets
+              key: LICENSE_KEY
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "48Mi"
+            cpu: "30m"
+          limits:
+            memory: "192Mi"
+            cpu: "300m"
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 3
+          timeoutSeconds: 3
+          failureThreshold: 30
+        
+        # Volume mounts
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      
+      # Pod anti-affinity
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - secure-nodejs-app
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secure-nodejs-app
+  namespace: secure-apps
+  labels:
+    app: secure-nodejs-app
+spec:
+  type: ClusterIP
+  selector:
+    app: secure-nodejs-app
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+    name: http
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: secure-nodejs-app-hpa
+  namespace: secure-apps
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: secure-nodejs-app
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+# Made with Bob

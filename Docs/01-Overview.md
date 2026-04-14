@@ -27,6 +27,14 @@ secure-container-code/
 │   ├── package.json
 │   ├── Dockerfile
 │   └── .dockerignore
+├── k8s/                 # Kubernetes manifests
+│   ├── go-app-deployment.yaml
+│   ├── cpp-app-deployment.yaml
+│   ├── python-app-deployment.yaml
+│   ├── nodejs-app-deployment.yaml
+│   ├── ingress.yaml
+│   ├── network-policy.yaml
+│   └── README.md
 └── Docs/                # Documentation
     ├── 01-Overview.md
     ├── 02-Go-Application.md
@@ -160,6 +168,19 @@ This approach is suitable for:
 - **SaaS Products**: Backend services with competitive advantages
 - **Licensed Software**: Applications requiring license enforcement
 
+## Kubernetes Deployment
+
+Production-ready Kubernetes manifests are available in the `k8s/` directory:
+
+- **Deployments** - All 4 applications with security hardening
+- **Services** - ClusterIP services for internal communication
+- **HPA** - Horizontal Pod Autoscaling for all applications
+- **Ingress** - Path and subdomain-based routing
+- **Network Policies** - Traffic restriction and isolation
+- **Security** - Non-root users, read-only FS, dropped capabilities
+
+See [k8s/README.md](../k8s/README.md) for deployment instructions.
+
 ## Next Steps
 
 Explore the detailed documentation for each language:
@@ -169,3 +190,4 @@ Explore the detailed documentation for each language:
 - [Node.js Application](./05-NodeJS-Application.md)
 - [Security Analysis](./06-Security-Analysis.md)
 - [Mermaid Diagrams](./07-Mermaid-Diagrams.md)
+- [Kubernetes Deployment](../k8s/README.md)
